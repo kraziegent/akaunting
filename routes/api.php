@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 $api = app('Dingo\Api\Routing\Router');
 
-$api->version('v2', ['middleware' => ['api']], function($api) {
-    $api->group(['namespace' => 'App\Http\Controllers\Api'], function($api) {
+$api->version('v3', ['middleware' => ['api']], function($api) {
+    $api->group(['as' => 'api', 'namespace' => 'App\Http\Controllers\Api'], function($api) {
         // Companies
         $api->get('companies/{company}/owner', 'Common\Companies@owner')->name('companies.owner');
         $api->get('companies/{company}/enable', 'Common\Companies@enable')->name('companies.enable');
@@ -29,12 +29,9 @@ $api->version('v2', ['middleware' => ['api']], function($api) {
         $api->resource('contacts', 'Common\Contacts');
 
         // Sales
-        $api->resource('invoices', 'Sales\Invoices');
-        $api->resource('invoices.transactions', 'Sales\InvoiceTransactions');
-
-        // Purchases
-        $api->get('bills/{bill}/received', 'Purchases\Bills@received')->name('bills.received');
-        $api->resource('bills', 'Purchases\Bills');
+        $api->resource('documents', 'Document\Documents');
+        $api->resource('documents.transactions', 'Document\DocumentTransactions');
+        $api->get('documents/{document}/received', 'Document\Documents@received')->name('documents.received');
 
         // Banking
         $api->get('accounts/{account}/enable', 'Banking\Accounts@enable')->name('accounts.enable');

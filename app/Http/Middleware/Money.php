@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
-
+use InvalidArgumentException;
+use OutOfBoundsException;
+use UnexpectedValueException;
 class Money
 {
     /**
@@ -17,27 +19,40 @@ class Money
     {
         if ($request->method() == 'POST' || $request->method() == 'PATCH') {
             $amount = $request->get('amount');
-            $bill_number = $request->get('bill_number');
-            $invoice_number = $request->get('invoice_number');
+            $document_number = $request->get('document_number');
             $sale_price = $request->get('sale_price');
             $purchase_price = $request->get('purchase_price');
             $opening_balance = $request->get('opening_balance');
             $items = $request->get('items');
 
             if (!empty($amount)) {
-                $amount = money($amount)->getAmount();
+                try {
+                    $amount = money($amount)->getAmount();
+                } catch (InvalidArgumentException | OutOfBoundsException | UnexpectedValueException $e) {
+                    logger($e->getMessage());
+
+                    $amount = 0;
+                }
 
                 $request->request->set('amount', $amount);
             }
 
-            if (isset($bill_number) || isset($invoice_number) || !empty($items)) {
+            if (isset($document_number) || !empty($items)) {
                 if (!empty($items)) {
                     foreach ($items as $key => $item) {
                         if (!isset($item['price'])) {
                             continue;
                         }
 
-                        $items[$key]['price'] = money($item['price'])->getAmount();
+                        try {
+                            $amount = money($item['price'])->getAmount();
+                        } catch (InvalidArgumentException | OutOfBoundsException | UnexpectedValueException $e) {
+                            logger($e->getMessage());
+
+                            $amount = 0;
+                        }
+
+                        $items[$key]['price'] = $amount;
                     }
 
                     $request->request->set('items', $items);
@@ -45,7 +60,15 @@ class Money
             }
 
             if (isset($opening_balance)) {
-                $opening_balance = money($opening_balance)->getAmount();
+                try {
+                    $amount = money($opening_balance)->getAmount();
+                } catch (InvalidArgumentException | OutOfBoundsException | UnexpectedValueException $e) {
+                    logger($e->getMessage());
+
+                    $amount = 0;
+                }
+
+                $opening_balance = $amount;
 
                 $request->request->set('opening_balance', $opening_balance);
             }

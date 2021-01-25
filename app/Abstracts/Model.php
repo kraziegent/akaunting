@@ -22,15 +22,18 @@ abstract class Model extends Eloquent
         'enabled' => 'boolean',
     ];
 
+    public static function observe($classes)
+    {
+        parent::observe($classes);
+    }
+
     /**
-     * The "booting" method of the model.
+     * The "booted" method of the model.
      *
      * @return void
      */
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
-
         static::addGlobalScope(new Company);
     }
 
@@ -42,6 +45,18 @@ abstract class Model extends Eloquent
     public function company()
     {
         return $this->belongsTo('App\Models\Common\Company');
+    }
+
+    /**
+     * Scope to only include company data.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeAllCompanies($query)
+    {
+        return $query->withoutGlobalScope(Company::class);
     }
 
     /**
@@ -70,9 +85,16 @@ abstract class Model extends Eloquent
         $request = request();
 
         $search = $request->get('search');
+
+        $query->usingSearchString($search)->sortable($sort);
+
+        if ($request->expectsJson() && $request->isNotApi()) {
+            return $query->get();
+        }
+
         $limit = $request->get('limit', setting('default.list_limit', '25'));
 
-        return $query->usingSearchString($search)->sortable($sort)->paginate($limit);
+        return $query->paginate($limit);
     }
 
     /**

@@ -52,15 +52,15 @@ class Transfers extends Controller
             ];
         }
 
-        $special_key = array(
+        $special_key = [
             'expense_transaction.name' => 'from_account',
             'income_transaction.name' => 'to_account',
-        );
+        ];
 
         $request = request();
 
         if (isset($request['sort']) && array_key_exists($request['sort'], $special_key)) {
-            $sort_order = array();
+            $sort_order = [];
 
             foreach ($data as $key => $value) {
                 $sort = $request['sort'];
@@ -77,12 +77,12 @@ class Transfers extends Controller
             array_multisort($sort_order, $sort_type, $data);
         }
 
-        $transfers = $this->paginate($data);
+        $transfers = $request->expectsJson() ? $data : $this->paginate($data);
 
         $accounts = collect(Account::enabled()->orderBy('name')->pluck('name', 'id'))
             ->prepend(trans('general.all_type', ['type' => trans_choice('general.accounts', 2)]), '');
 
-        return view('banking.transfers.index', compact('transfers', 'accounts'));
+        return $this->response('banking.transfers.index', compact('transfers', 'accounts'));
     }
 
     /**

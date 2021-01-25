@@ -23,10 +23,13 @@ class Setting extends Eloquent
      */
     protected $fillable = ['company_id', 'key', 'value'];
 
-    protected static function boot()
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
     {
-        parent::boot();
-
         static::addGlobalScope(new Company);
     }
 

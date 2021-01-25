@@ -14,8 +14,10 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
+        // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
-        \MisterPhilip\MaintenanceMode\Http\Middleware\CheckForMaintenanceMode::class,
+        \Fruitcake\Cors\HandleCors::class,
+        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
@@ -51,7 +53,7 @@ class Kernel extends HttpKernel
         'api' => [
             'api.auth',
             'auth.disabled',
-            'throttle:60,1',
+            'throttle:api',
             'permission:read-api',
             'api.company',
             'bindings',

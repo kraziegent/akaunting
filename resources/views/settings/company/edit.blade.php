@@ -28,17 +28,17 @@
 
                 {{ Form::textareaGroup('address', trans('settings.company.address'), null, setting('company.address')) }}
 
-                {{ Form::fileGroup('logo', trans('settings.company.logo'), 'file-image-o', [], setting('company.logo')) }}
+                {{ Form::fileGroup('logo', trans('settings.company.logo'), 'file-image-o', ['dropzone-class' => 'form-file', 'options' => ['acceptedFiles' => 'image/*']], setting('company.logo')) }}
             </div>
         </div>
 
-        @permission('update-settings-settings')
+        @can('update-settings-settings')
             <div class="card-footer">
                 <div class="row save-buttons">
                     {{ Form::saveButtons('settings.index') }}
                 </div>
             </div>
-        @endpermission
+        @endcan
     </div>
 
     {!! Form::hidden('_prefix', 'company') !!}

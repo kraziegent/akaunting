@@ -32,13 +32,7 @@ class Revenues extends Controller
     {
         $revenues = Transaction::with('account', 'category', 'contact', 'invoice')->income()->isNotTransfer()->collect(['paid_at'=> 'desc']);
 
-        $customers = Contact::customer()->enabled()->orderBy('name')->pluck('name', 'id');
-
-        $categories = Category::income()->enabled()->orderBy('name')->pluck('name', 'id');
-
-        $accounts = Account::enabled()->orderBy('name')->pluck('name', 'id');
-
-        return view('sales.revenues.index', compact('revenues', 'customers', 'categories', 'accounts'));
+        return $this->response('sales.revenues.index', compact('revenues'));
     }
 
     /**
@@ -66,9 +60,9 @@ class Revenues extends Controller
 
         $currency = Currency::where('code', $account_currency_code)->first();
 
-        $customers = Contact::customer()->enabled()->orderBy('name')->pluck('name', 'id');
+        $customers = Contact::customer()->enabled()->orderBy('name')->take(setting('default.select_limit'))->pluck('name', 'id');
 
-        $categories = Category::income()->enabled()->orderBy('name')->pluck('name', 'id');
+        $categories = Category::income()->enabled()->orderBy('name')->take(setting('default.select_limit'))->pluck('name', 'id');
 
         $payment_methods = Modules::getPaymentMethods();
 
@@ -154,9 +148,17 @@ class Revenues extends Controller
 
         $currency = Currency::where('code', $revenue->currency_code)->first();
 
-        $customers = Contact::customer()->enabled()->orderBy('name')->pluck('name', 'id');
+        $customers = Contact::customer()->enabled()->orderBy('name')->take(setting('default.select_limit'))->pluck('name', 'id');
 
-        $categories = Category::income()->enabled()->orderBy('name')->pluck('name', 'id');
+        if ($revenue->contact && !$customers->has($revenue->contact_id)) {
+            $customers->put($revenue->contact->id, $revenue->contact->name);
+        }
+
+        $categories = Category::income()->enabled()->orderBy('name')->take(setting('default.select_limit'))->pluck('name', 'id');
+
+        if ($revenue->category && !$categories->has($revenue->category_id)) {
+            $categories->put($revenue->category->id, $revenue->category->name);
+        }
 
         $payment_methods = Modules::getPaymentMethods();
 

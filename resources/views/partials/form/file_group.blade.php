@@ -7,12 +7,33 @@
             {!! Form::label($name, $text, ['class' => 'form-control-label'])!!}
         @endif
 
-        <div class="custom-file">
-            {!! Form::file($name, array_merge([
-                'class' => 'custom-file-input cursor-pointer',
-                '@input' => 'onHandleFileUpload("' . $name .'", $event)'
-            ], $attributes)) !!}
-            {!! Form::label($name, $text, ['class' => 'custom-file-label']) !!}
+        <div class="input-group input-group-merge">
+            <akaunting-dropzone-file-upload
+                text-drop-file="{{ trans('general.form.drop_file') }}"
+                text-choose-file="{{ trans('general.form.choose_file') }}"
+
+                @if (!empty($attributes['dropzone-class']))
+                class="{{ $attributes['dropzone-class'] }}"
+                @endif
+
+                @if (!empty($attributes['options']))
+                :options={{ json_encode($attributes['options']) }}
+                @endif
+
+                @if (!empty($attributes['multiple']))
+                multiple
+                @endif
+
+                @if (!empty($attributes['previewClasses']))
+                preview-classes="{{ $attributes['previewClasses'] }}"
+                @endif
+
+                @if (!empty($attributes['url']))
+                url="{{ $attributes['url'] }}"
+                @endif
+
+                v-model="{{ !empty($attributes['v-model']) ? $attributes['v-model'] : (!empty($attributes['data-field']) ? 'form.' . $attributes['data-field'] . '.'. $name : 'form.' . $name) }}"
+            ></akaunting-dropzone-file-upload>
         </div>
 
         <div class="invalid-feedback d-block"
